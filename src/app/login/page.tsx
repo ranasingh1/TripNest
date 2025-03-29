@@ -16,6 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { useAuth } from "@/lib/auth/authContext"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -24,18 +25,28 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
+  const { signIn, user } = useAuth()
 
+  if (user) {
+    router.push("/admin/dashboard")
+    return null
+  }
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
     setIsLoading(true)
 
     try {
-      // TODO: Replace this with real login logic
-      await new Promise((res) => setTimeout(res, 1500))
-      router.push("/") // Redirect after success
-    } catch (err) {
-      setError("Failed to login. Please check your credentials.")
+      await signIn(email, password)
+      router.push("/admin/dashboard")
+    } catch (err: any) {
+      if (err.code === "auth/user-not-found") {
+        setError("User not found.")
+      } else if (err.code === "auth/wrong-password") {
+        setError("Incorrect password.")
+      } else {
+        setError("Login failed. Please check your credentials.")
+      }
     } finally {
       setIsLoading(false)
     }
@@ -55,7 +66,6 @@ export default function LoginPage() {
 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email */}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -69,7 +79,6 @@ export default function LoginPage() {
               />
             </div>
 
-            {/* Password */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
@@ -100,14 +109,12 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Error */}
             {error && (
               <div className="bg-red-100 text-red-700 text-sm p-3 rounded-md">
                 {error}
               </div>
             )}
 
-            {/* Submit */}
             <Button
               type="submit"
               className="w-full bg-teal-600 hover:bg-teal-700"

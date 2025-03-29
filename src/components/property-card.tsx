@@ -21,7 +21,7 @@ interface PropertyCardProps {
     guests: number
     amenities: string[]
     isSuperhost?: boolean
-    isNew?: boolean
+    isNewListing?: boolean
     discount?: number
     availability?: string
   }
@@ -42,7 +42,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
     guests,
     amenities,
     isSuperhost,
-    isNew,
+    isNewListing,
     discount,
     availability,
   } = property
@@ -83,7 +83,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
           {/* Badges */}
           <div className="absolute top-4 left-4 flex flex-col gap-2">
             {isSuperhost && <Badge className="bg-white text-teal-600 hover:bg-white">Superhost</Badge>}
-            {isNew && <Badge className="bg-teal-600 hover:bg-teal-700">New</Badge>}
+            {isNewListing && <Badge className="bg-teal-600 hover:bg-teal-700">New</Badge>}
             {(discount ?? 0) > 0 && <Badge className="bg-red-500 hover:bg-red-600">{discount}% OFF</Badge>}
           </div>
         </div>
