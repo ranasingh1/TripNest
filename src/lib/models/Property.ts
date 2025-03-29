@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Types } from 'mongoose';
+import mongoose, { Schema, Document } from 'mongoose';
 
 interface HostInfo {
   name: string;
@@ -43,45 +43,53 @@ export interface IProperty extends Document {
   host: HostInfo;
   rules: Rules;
   location_details: LocationDetails;
+  owner: string;
+  ownerEmail: string;
 }
 
-const PropertySchema = new Schema<IProperty>({
-  title: { type: String, required: true },
-  description: { type: String, required: true },
-  location: { type: String, required: true },
-  price: { type: Number, required: true },
-  rating: Number,
-  reviews: Number,
-  images: [String],
-  beds: Number,
-  baths: Number,
-  guests: Number,
-  amenities: [String],
-  isSuperhost: Boolean,
-  isNewListing: Boolean,
-  discount: Number,
-  availability: String,
-  host: {
-    name: String,
-    image: String,
-    responseRate: Number,
-    responseTime: String,
-    joined: String,
-  },
-  rules: {
-    checkIn: String,
-    checkOut: String,
-    pets: Boolean,
-    smoking: Boolean,
-    parties: Boolean,
-  },
-  location_details: {
-    address: String,
-    coordinates: {
-      lat: Number,
-      lng: Number,
+const PropertySchema = new Schema<IProperty>(
+  {
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+    location: { type: String, required: true },
+    price: { type: Number, required: true },
+    rating: Number,
+    reviews: Number,
+    images: [String],
+    beds: Number,
+    baths: Number,
+    guests: Number,
+    amenities: [String],
+    isSuperhost: Boolean,
+    isNewListing: Boolean,
+    discount: Number,
+    availability: String,
+    host: {
+      name: String,
+      image: String,
+      responseRate: Number,
+      responseTime: String,
+      joined: String,
     },
+    rules: {
+      checkIn: String,
+      checkOut: String,
+      pets: Boolean,
+      smoking: Boolean,
+      parties: Boolean,
+    },
+    location_details: {
+      address: String,
+      coordinates: {
+        lat: Number,
+        lng: Number,
+      },
+    },
+    owner: { type: String, required: true },
+    ownerEmail: { type: String, required: true },
   },
-}, { timestamps: true });
+  { timestamps: true }
+);
 
-export default mongoose.models.Property || mongoose.model<IProperty>('Property', PropertySchema);
+export default mongoose.models.Property ||
+  mongoose.model<IProperty>('Property', PropertySchema);

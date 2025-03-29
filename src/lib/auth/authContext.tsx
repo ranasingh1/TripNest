@@ -33,14 +33,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
+        // Retrieve token and store it in localStorage
+        const token = await firebaseUser.getIdToken();
+        localStorage.setItem("token", token);
+
         setUser({
           displayName: firebaseUser.displayName || "",
           email: firebaseUser.email || "",
           uid: firebaseUser.uid,
         });
       } else {
+        localStorage.removeItem("token");
         setUser(null);
       }
       setLoading(false);
@@ -51,6 +56,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string): Promise<CustomUser> => {
     const result = await signInWithEmailAndPassword(auth, email, password);
+    // Get the token and store it in localStorage
+    const token = await result.user.getIdToken();
+    localStorage.setItem("token", token);
+
     const customUser = {
       displayName: result.user.displayName || "",
       email: result.user.email || "",
@@ -63,6 +72,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, name: string): Promise<CustomUser> => {
     const result = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(result.user, { displayName: name });
+    // Get the token and store it in localStorage
+    const token = await result.user.getIdToken();
+    localStorage.setItem("token", token);
+
     const customUser = {
       displayName: name,
       email: result.user.email || "",
@@ -74,12 +87,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logOut = async () => {
     await signOut(auth);
+    localStorage.removeItem("token");
     setUser(null);
   };
 
   const resetPassword = async (email: string) => {
     await sendPasswordResetEmail(auth, email);
   };
+
   const authValue: AuthContextType = { user, loading, signIn, signUp, logOut, resetPassword };
 
   return (
@@ -87,7 +102,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       {children}
     </AuthContext.Provider>
   );
-
 }
 
 export function useAuth() {

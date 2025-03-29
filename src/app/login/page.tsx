@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Eye, EyeOff } from "lucide-react"
@@ -26,11 +26,12 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const router = useRouter()
   const { signIn, user } = useAuth()
+  useEffect(() => {
+    if (user) {
+      router.push("/dashboard")
+    }
+  }, [user, router])
 
-  if (user) {
-    router.push("/admin/dashboard")
-    return null
-  }
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
@@ -38,7 +39,7 @@ export default function LoginPage() {
 
     try {
       await signIn(email, password)
-      router.push("/admin/dashboard")
+      router.push("/dashboard")
     } catch (err: any) {
       if (err.code === "auth/user-not-found") {
         setError("User not found.")

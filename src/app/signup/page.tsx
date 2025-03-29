@@ -24,7 +24,7 @@ export default function SignupPage() {
   const router = useRouter()
   const { signUp, user } = useAuth()
   if (user) {
-    router.push("/admin/dashboard")
+    router.push("/dashboard")
     return null
   }
   const handleSubmit = async (e: React.FormEvent) => {
@@ -40,7 +40,7 @@ export default function SignupPage() {
   
     try {
       await signUp(email, password, name)
-      router.push("/admin/dashboard") 
+      router.push("/dashboard") 
     } catch (err: any) {
       if (err.code === "auth/email-already-in-use") {
         setError("Email is already registered.")
