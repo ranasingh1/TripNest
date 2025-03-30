@@ -3,10 +3,10 @@ import SearchResults from "@/components/sections/SerachResults";
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string };
+  searchParams:any;
 }) {
   const plainParams = Object.fromEntries(Object.entries(searchParams));
-  const params = new URLSearchParams(plainParams);
+  const params:any = new URLSearchParams(plainParams as any);
   const queryString = params.toString();
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
