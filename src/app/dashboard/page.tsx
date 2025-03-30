@@ -1,50 +1,58 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { Building, BookOpen, Calendar, DollarSign, TrendingUp, Users, PlusCircle, Star } from "lucide-react"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import {
+  Building,
+  BookOpen,
+  Calendar,
+  DollarSign,
+  TrendingUp,
+  Users,
+  PlusCircle,
+  Star,
+} from "lucide-react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { useAuth } from "@/lib/auth/authContext"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/auth/authContext";
 
 export default function Dashboard() {
-  const { user } = useAuth()
+  const { user } = useAuth();
   const [stats, setStats] = useState({
     properties: 0,
     bookings: 0,
     revenue: 0,
     occupancyRate: 0,
-  })
-  const [loading, setLoading] = useState(true)
+  });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-
-        setStats({
-          properties: 3,
-          bookings: 12,
-          revenue: 2450,
-          occupancyRate: 68,
-        })
+        const res = await fetch("/api/dashboard/", {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        const data = await res.json();
+        setStats(data);
       } catch (error) {
-        console.error("Error fetching stats:", error)
+        console.error("Error fetching stats:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchStats()
-  }, [])
+    fetchStats();
+  }, []);
 
   return (
     <div className="p-6 lg:p-8">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold">Dashboard</h1>
-          <p className="text-gray-500">Welcome back, {user?.displayName || user?.email?.split("@")[0] || "User"}</p>
+          <p className="text-gray-500">
+            Welcome back, {user?.displayName || user?.email?.split("@")[0] || "User"}
+          </p>
         </div>
         <div className="mt-4 md:mt-0">
           <Link href="/dashboard/properties/new">
@@ -58,6 +66,7 @@ export default function Dashboard() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Properties */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-500">Properties</CardTitle>
@@ -75,6 +84,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
+        {/* Bookings */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-500">Bookings</CardTitle>
@@ -92,6 +102,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
+        {/* Revenue */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-500">Revenue</CardTitle>
@@ -109,6 +120,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
+        {/* Occupancy Rate */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-500">Occupancy Rate</CardTitle>
@@ -225,6 +237,5 @@ export default function Dashboard() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
-

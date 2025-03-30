@@ -35,7 +35,6 @@ export default function BookingDetailsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const [isEditing, setIsEditing] = useState(false)
   const [editedBooking, setEditedBooking] = useState<any>(null)
   const [dateRange, setDateRange] = useState<{
     from: Date | undefined

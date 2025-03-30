@@ -3,11 +3,28 @@ import Property from '@/lib/models/Property';
 import { verifyFirebaseToken } from '@/lib/auth/verifyFirebaseToken';
 import { dbConnect } from '@/lib/db';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   await dbConnect();
+
+  const isUserQuery = req.nextUrl.searchParams.get("user") === "true";
+
+  if (isUserQuery) {
+    const token = req.headers.get("authorization")?.split(" ")[1];
+    const user = token ? await verifyFirebaseToken(token) : null;
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userProperties = await Property.find({ owner: user.uid }).sort({ createdAt: -1 });
+    return NextResponse.json(userProperties);
+  }
+
+  // Public fetch all
   const properties = await Property.find().sort({ createdAt: -1 });
   return NextResponse.json(properties);
 }
+
 
 export async function POST(req: NextRequest) {
   const token = req.headers.get('authorization')?.split(' ')[1];

@@ -2,6 +2,8 @@
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { toast } from "sonner";
+
 
 export default function NewsletterSignup() {
   return (
@@ -19,7 +21,8 @@ export default function NewsletterSignup() {
           <form
             onSubmit={(e) => {
               e.preventDefault()
-              // Optional: trigger API call or toast
+              toast("Subscribed successfully!");
+
             }}
             className="flex flex-col sm:flex-row items-center gap-4 max-w-lg mx-auto"
           >

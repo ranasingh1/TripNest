@@ -1,11 +1,12 @@
 import Header from "@/components/layout/Header"
 import HeroSection from "@/components/sections/HeroSection"
 import PopularDestinations from "@/components/sections/PopularDestinations"
-import PropertyTypes from "@/components/sections/PropertyTypes"
+import PropertyTypes from "@/components/sections/HomesGuestsLove"
 import FeaturedProperties from "@/components/sections/FeaturedProperties"
 import SpecialDeals from "@/components/sections/SpecialDeals"
 import Testimonials from "@/components/sections/Testimonials"
 import NewsletterSignup from "@/components/sections/NewsletterSignup"
+import Footer from "@/components/layout/Footer"
 
 export default function HomePage() {
   return (
@@ -20,6 +21,7 @@ export default function HomePage() {
         <Testimonials />
         <NewsletterSignup />
       </main>
+      <Footer/>
     </div>
   )
 }

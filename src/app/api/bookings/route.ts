@@ -4,7 +4,6 @@ import Property from '@/lib/models/Property';
 import { dbConnect } from '@/lib/db';
 import nodemailer from 'nodemailer';
 
-// Initialize transporter once to avoid re-creating it for every request
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
   port: Number(process.env.EMAIL_PORT),

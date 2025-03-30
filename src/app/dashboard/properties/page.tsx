@@ -47,8 +47,10 @@ export default function PropertiesPage() {
     const fetchProperties = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch("/api/properties", {
-          headers: { Authorization: `Bearer ${token}` },
+        const res = await fetch(`/api/properties?user=true`, {
+          headers: { Authorization: `Bearer ${
+            localStorage.getItem("token")
+          }` },
         });
         if (!res.ok) throw new Error("Failed to fetch properties");
         const data = await res.json();

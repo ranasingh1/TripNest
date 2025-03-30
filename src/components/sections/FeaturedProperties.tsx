@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 import PropertyCard from "@/components/property-card";
@@ -10,6 +9,7 @@ export default function FeaturedProperties() {
   const [properties, setProperties] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     async function fetchProperties() {
@@ -28,6 +28,8 @@ export default function FeaturedProperties() {
     fetchProperties();
   }, []);
 
+  const visibleProperties = showAll ? properties : properties.slice(0, 3);
+
   return (
     <section className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">
@@ -36,12 +38,16 @@ export default function FeaturedProperties() {
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
             Featured Properties
           </h2>
-          <Link href="/dashboard/properties">
-            <Button variant="link" className="text-teal-600 font-medium group px-0">
-              View all
+          {properties.length > 3 && (
+            <Button
+              variant="link"
+              className="text-teal-600 font-medium group px-0"
+              onClick={() => setShowAll(!showAll)}
+            >
+              {showAll ? "Show less" : "View all"}
               <ChevronRight className="h-4 w-4 ml-1 transition-transform duration-200 group-hover:translate-x-1" />
             </Button>
-          </Link>
+          )}
         </div>
 
         {/* Properties Grid */}
@@ -49,9 +55,9 @@ export default function FeaturedProperties() {
           <div className="text-center">Loading...</div>
         ) : error ? (
           <div className="text-center text-red-500">{error}</div>
-        ) : properties.length > 0 ? (
+        ) : visibleProperties.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {properties.map((property) => (
+            {visibleProperties.map((property) => (
               <PropertyCard key={property._id} property={property} />
             ))}
           </div>

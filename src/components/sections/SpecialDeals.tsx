@@ -1,22 +1,30 @@
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
+"use client"
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { toast, Toaster } from "sonner";
 
 const deals = [
   {
     title: "Summer Getaways",
     description: "Save up to 25% on beach destinations worldwide",
     buttonText: "View Deals",
-    image: "/",
+    image:
+      "https://res.cloudinary.com/dawgt41cb/image/upload/v1743363552/r1xhzds53zvrpy8rwzdo.jpg",
   },
   {
     title: "Last Minute Escapes",
     description: "Incredible deals on properties available this month",
     buttonText: "Book Now",
-    image: "/",
+    image:
+      "https://res.cloudinary.com/dawgt41cb/image/upload/v1743363560/lbxlhte2qzv34kxzuaxq.jpg",
   },
-]
+];
 
 export default function SpecialDeals() {
+  const handleClick = () => {
+    toast("Feature coming soon");
+  };
+
   return (
     <section className="py-16 bg-white">
       <div className="container mx-auto px-4">
@@ -44,6 +52,7 @@ export default function SpecialDeals() {
                 <p className="text-sm sm:text-base mb-4">{deal.description}</p>
                 <Button
                   className="bg-white text-teal-600 hover:bg-gray-100 font-medium"
+                  onClick={handleClick}
                 >
                   {deal.buttonText}
                 </Button>
@@ -51,7 +60,8 @@ export default function SpecialDeals() {
             </div>
           ))}
         </div>
+        <Toaster />
       </div>
     </section>
-  )
+  );
 }

@@ -68,7 +68,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
   const [inventory, setinventory] = useState<Date[]>([]);
 
   // ----------------------------------------------------------------------------
-  // Fetch property data on mount and populate state
+  // Fetch property data
   // ----------------------------------------------------------------------------
   useEffect(() => {
     async function fetchProperty() {

@@ -6,7 +6,7 @@ export default function HeroSection() {
     <section className="relative min-h-[500px] md:min-h-[600px] lg:min-h-[700px] w-full">
       <div className="absolute inset-0 -z-10">
         <Image
-          src="/"
+          src="https://res.cloudinary.com/dawgt41cb/image/upload/v1743355199/pwj2rgie5hltmh1nqcrl.jpg"
           alt="Beautiful vacation destination"
           fill
           className="object-cover"
