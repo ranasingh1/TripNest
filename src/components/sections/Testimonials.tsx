@@ -5,19 +5,19 @@ const testimonials = [
     name: "Sarah Johnson",
     location: "New York, USA",
     quote:
-      "StayScape made finding our dream vacation home so easy. The property was exactly as described and the host was amazing!",
+      "TripNest made finding our dream vacation home so easy. The property was exactly as described and the host was amazing!",
   },
   {
     name: "David Chen",
     location: "Toronto, Canada",
     quote:
-      "We've used StayScape for our last three family vacations and have never been disappointed. The selection of properties is outstanding.",
+      "We've used TripNest for our last three family vacations and have never been disappointed. The selection of properties is outstanding.",
   },
   {
     name: "Maria Rodriguez",
     location: "Madrid, Spain",
     quote:
-      "As someone who travels frequently for work, I appreciate how simple StayScape makes it to find comfortable accommodations anywhere in the world.",
+      "As someone who travels frequently for work, I appreciate how simple TripNest makes it to find comfortable accommodations anywhere in the world.",
   },
 ]
 

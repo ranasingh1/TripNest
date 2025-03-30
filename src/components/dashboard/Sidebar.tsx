@@ -40,7 +40,7 @@ export default function DashboardSidebar() {
         <div className="p-6">
           <div className="flex items-center justify-between mb-8">
             <Link href="/" className="text-2xl font-bold text-teal-600">
-              StayScape
+              TripNest
             </Link>
             <button className="lg:hidden text-gray-500 hover:text-gray-700" onClick={() => setSidebarOpen(false)}>
               <X size={24} />

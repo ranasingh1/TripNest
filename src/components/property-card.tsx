@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card"
 
 interface PropertyCardProps {
   property: {
-    id: string
+    _id: string
     title: string
     description: string
     location: string
@@ -29,7 +29,7 @@ interface PropertyCardProps {
 
 const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
   const {
-    id,
+    _id,
     title,
     description,
     location,
@@ -113,7 +113,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
         </div>
 
         {/* Title */}
-        <Link href={`/property/${id}`} className="group-hover:text-teal-600 transition-colors">
+        <Link href={`/property/${_id}`} className="group-hover:text-teal-600 transition-colors">
           <h3 className="text-xl font-bold mb-2">{title}</h3>
         </Link>
 
@@ -160,7 +160,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
 
         {/* Call to Action */}
         <div className="mt-auto pt-4">
-          <Link href={`/property/${id}`} className="w-full">
+          <Link href={`/property/${property._id}`} className="w-full">
             <Button className="w-full bg-teal-600 hover:bg-teal-700">View Details</Button>
           </Link>
         </div>

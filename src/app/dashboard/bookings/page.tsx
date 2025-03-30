@@ -1,5 +1,7 @@
 "use client"
 
+import { DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+
 import { useState, useEffect } from "react"
 import {
   Calendar,
@@ -9,7 +11,11 @@ import {
   Eye,
   Check,
   X,
-  MessageSquare,
+  MoreHorizontal,
+  Edit,
+  Trash2,
+  AlertTriangle,
+  Clock,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -20,74 +26,43 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Skeleton } from "@/components/ui/skeleton"
-
-const mockBookings = [
-  {
-    id: "booking-1",
-    propertyId: "luxury-villa-bali",
-    propertyName: "Luxury Villa with Ocean View",
-    propertyImage: "/placeholder.svg?height=300&width=500&text=Luxury Villa",
-    guestName: "John Smith",
-    guestEmail: "john.smith@example.com",
-    checkIn: new Date(2023, 6, 15),
-    checkOut: new Date(2023, 6, 20),
-    totalPrice: 1250,
-    status: "confirmed",
-    paymentId: "pay_123456",
-    createdAt: new Date(2023, 5, 10),
-  },
-  {
-    id: "booking-2",
-    propertyId: "mountain-cabin-aspen",
-    propertyName: "Cozy Mountain Cabin",
-    propertyImage: "/placeholder.svg?height=300&width=500&text=Mountain Cabin",
-    guestName: "Emily Johnson",
-    guestEmail: "emily.johnson@example.com",
-    checkIn: new Date(2023, 7, 5),
-    checkOut: new Date(2023, 7, 10),
-    totalPrice: 875,
-    status: "confirmed",
-    paymentId: "pay_234567",
-    createdAt: new Date(2023, 6, 1),
-  },
-  {
-    id: "booking-3",
-    propertyId: "beachfront-apartment-cancun",
-    propertyName: "Modern Beachfront Apartment",
-    propertyImage: "/placeholder.svg?height=300&width=500&text=Beachfront Apartment",
-    guestName: "Michael Brown",
-    guestEmail: "michael.brown@example.com",
-    checkIn: new Date(2023, 8, 12),
-    checkOut: new Date(2023, 8, 18),
-    totalPrice: 1170,
-    status: "pending",
-    paymentId: "pay_345678",
-    createdAt: new Date(2023, 7, 15),
-  },
-]
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { toast, Toaster } from "sonner"
 
 export default function BookingsPage() {
-  const [bookings, setBookings] = useState<typeof mockBookings>([])
+  const [bookings, setBookings] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
 
+  // State for modals
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [selectedBooking, setSelectedBooking] = useState<any>(null)
+  const [newStatus, setNewStatus] = useState<string>("")
+
+
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-        setBookings(mockBookings)
+        const res = await fetch("/api/bookings")
+        if (!res.ok) {
+          throw new Error("Error fetching bookings")
+        }
+        const data = await res.json()
+        setBookings(data)
       } catch (error) {
         console.error("Error fetching bookings:", error)
       } finally {
@@ -98,19 +73,20 @@ export default function BookingsPage() {
     fetchBookings()
   }, [])
 
+  // Filter bookings using booking.name, booking.email, and propertyName
   const filteredBookings = bookings.filter((booking) => {
     const matchesSearch =
-      booking.guestName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      booking.guestEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      booking.propertyName.toLowerCase().includes(searchQuery.toLowerCase())
+      booking.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      booking.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      booking.propertyName?.toLowerCase().includes(searchQuery.toLowerCase())
 
     const matchesStatus = statusFilter ? booking.status === statusFilter : true
 
     return matchesSearch && matchesStatus
   })
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString("en-US", {
+  const formatDate = (date: Date | string) => {
+    return new Date(date).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -122,23 +98,111 @@ export default function BookingsPage() {
       case "confirmed":
         return (
           <Badge className="bg-green-100 text-green-800 hover:bg-green-200">
+            <Check className="h-3 w-3 mr-1" />
             Confirmed
           </Badge>
         )
       case "pending":
         return (
           <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">
+            <Clock className="h-3 w-3 mr-1" />
             Pending
           </Badge>
         )
       case "cancelled":
         return (
           <Badge className="bg-red-100 text-red-800 hover:bg-red-200">
+            <X className="h-3 w-3 mr-1" />
             Cancelled
           </Badge>
         )
       default:
         return <Badge>{status}</Badge>
+    }
+  }
+
+  // Open edit dialog
+  const openEditDialog = (booking: any) => {
+    setSelectedBooking(booking)
+    setNewStatus(booking.status)
+    setEditDialogOpen(true)
+  }
+
+  // Open delete dialog
+  const openDeleteDialog = (booking: any) => {
+    setSelectedBooking(booking)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleUpdateBooking = async () => {
+    if (!selectedBooking || !newStatus) return
+
+    try {
+      setLoading(true)
+      const res = await fetch(`/api/bookings/${selectedBooking._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ status: newStatus }),
+      })
+
+      if (!res.ok) {
+        throw new Error("Failed to update booking")
+      }
+
+      const updatedBooking = await res.json()
+
+      setBookings((prev) => prev.map((b) => (b._id === updatedBooking._id ? updatedBooking : b)))
+
+      toast.success("Booking updated successfully", {
+        description: `Status changed to ${newStatus}`,
+      })
+
+      setEditDialogOpen(false)
+    } catch (error) {
+      console.error("Error updating booking:", error)
+      toast.error("Failed to update booking", {
+        description: "Please try again later",
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Delete booking and update property accordingly
+  const handleDeleteBooking = async () => {
+    if (!selectedBooking) return
+
+    try {
+      setLoading(true)
+      const res = await fetch(`/api/bookings/${selectedBooking._id}`, {
+        method: "DELETE",
+        headers: {
+          authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
+
+      if (!res.ok) {
+        throw new Error("Failed to delete booking")
+      }
+
+      // Remove the booking from local state
+      setBookings((prev) => prev.filter((b) => b._id !== selectedBooking._id))
+
+      toast.success("Booking deleted successfully", {
+        description: `Booking for ${selectedBooking.propertyName} has been removed`,
+      })
+
+      setDeleteDialogOpen(false)
+    } catch (error) {
+      console.error("Error deleting booking:", error)
+      toast.error("Failed to delete booking", {
+        description: "Please try again later",
+      })
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -175,18 +239,10 @@ export default function BookingsPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => setStatusFilter(null)}>
-                  All Bookings
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setStatusFilter("confirmed")}>
-                  Confirmed
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setStatusFilter("pending")}>
-                  Pending
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setStatusFilter("cancelled")}>
-                  Cancelled
-                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setStatusFilter(null)}>All Bookings</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setStatusFilter("confirmed")}>Confirmed</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setStatusFilter("pending")}>Pending</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setStatusFilter("cancelled")}>Cancelled</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -226,7 +282,7 @@ export default function BookingsPage() {
                 </TableHeader>
                 <TableBody>
                   {filteredBookings.map((booking) => (
-                    <TableRow key={booking.id}>
+                    <TableRow key={booking._id}>
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <div className="h-10 w-10 rounded-md overflow-hidden">
@@ -236,66 +292,57 @@ export default function BookingsPage() {
                               className="h-full w-full object-cover"
                             />
                           </div>
-                          <span className="font-medium">
-                            {booking.propertyName}
-                          </span>
+                          <span className="font-medium">{booking.propertyName}</span>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div>
-                          <div className="font-medium">{booking.guestName}</div>
-                          <div className="text-sm text-gray-500">
-                            {booking.guestEmail}
-                          </div>
+                          <div className="font-medium">{booking.name}</div>
+                          <div className="text-sm text-gray-500">{booking.email}</div>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center">
                           <Calendar className="h-4 w-4 mr-1 text-gray-500" />
                           <span>
-                            {formatDate(booking.checkIn)} -{" "}
-                            {formatDate(booking.checkOut)}
+                            {formatDate(booking.checkIn)} - {formatDate(booking.checkOut)}
                           </span>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <span className="font-medium">
-                          ${booking.totalPrice}
-                        </span>
+                        <span className="font-medium">${booking.totalPrice}</span>
                       </TableCell>
                       <TableCell>{getStatusBadge(booking.status)}</TableCell>
                       <TableCell>{formatDate(booking.createdAt)}</TableCell>
                       <TableCell className="text-right">
-                        <div className="flex justify-end space-x-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 text-green-600"
-                          >
-                            <Check className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 text-red-500"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 text-blue-500"
-                          >
-                            <MessageSquare className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              className="cursor-pointer"
+                              onClick={() => (window.location.href = `/dashboard/bookings/${booking._id}`)}
+                            >
+                              <Eye className="h-4 w-4 mr-2" />
+                              View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => openEditDialog(booking)}>
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit Status
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="cursor-pointer text-red-600"
+                              onClick={() => openDeleteDialog(booking)}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete Booking
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -317,6 +364,89 @@ export default function BookingsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Edit Status Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Update Booking Status</DialogTitle>
+            <DialogDescription>Change the status for booking at {selectedBooking?.propertyName}</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <label htmlFor="status" className="text-sm font-medium">
+                Status
+              </label>
+              <Select value={newStatus} onValueChange={setNewStatus}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="confirmed">Confirmed</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpdateBooking} disabled={loading}>
+              {loading ? "Updating..." : "Update Status"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="h-5 w-5" />
+              Delete Booking
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this booking? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            {selectedBooking && (
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="h-10 w-10 rounded-md overflow-hidden">
+                    <img
+                      src={selectedBooking.propertyImage || "/placeholder.svg"}
+                      alt={selectedBooking.propertyName}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <div className="font-medium">{selectedBooking.propertyName}</div>
+                    <div className="text-sm text-gray-500">
+                      {formatDate(selectedBooking.checkIn)} - {formatDate(selectedBooking.checkOut)}
+                    </div>
+                  </div>
+                </div>
+                <div className="text-sm text-gray-600">Guest: {selectedBooking.name}</div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteBooking} disabled={loading}>
+              {loading ? "Deleting..." : "Delete Booking"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Toaster />
     </div>
   )
 }
+
