@@ -10,7 +10,6 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  // Get and verify the Firebase token
   const token = req.headers.get('authorization')?.split(' ')[1];
   const user = token ? await verifyFirebaseToken(token) : null;
   if (!user) {
@@ -19,8 +18,8 @@ export async function POST(req: NextRequest) {
 
   const data = await req.json();
   await dbConnect();
+console.log(data.inventory, "data");
 
-  // Build the property data explicitly so that owner fields are not overridden by client data
   const propertyData = {
     title: data.title,
     description: data.description,
@@ -40,12 +39,11 @@ export async function POST(req: NextRequest) {
     host: data.host || {},
     rules: data.rules || {},
     location_details: data.location_details || {},
-    // Set owner fields explicitly from the verified user
     owner: user.uid,
     ownerEmail: user.email,
+    inventory: data.inventory ? data.inventory.map((date: string) => new Date(date)) : [],
   };
 
-  console.log('Saving property with data:', propertyData);
 
   const newProperty = await Property.create(propertyData);
 

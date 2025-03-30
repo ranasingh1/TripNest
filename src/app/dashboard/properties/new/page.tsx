@@ -9,9 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar } from "@/components/ui/calendar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
 
 const AMENITY_OPTIONS = [
   "WiFi",
@@ -82,10 +83,10 @@ export default function NewPropertyPage() {
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
 
-  // Availability
+  // Inventory (Blocked Dates for bookings)
   const [blockedDates, setBlockedDates] = useState<Date[]>([]);
 
-  // Handlers
+  // Handlers for Images
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const filesArray = Array.from(e.target.files);
@@ -94,27 +95,6 @@ export default function NewPropertyPage() {
       preview: URL.createObjectURL(file),
     }));
     setImages((prev) => [...prev, ...newImages]);
-  };
-
-  const handleHostImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) {
-      const file = e.target.files[0];
-      setHostImage({ file, preview: URL.createObjectURL(file) });
-    }
-  };
-
-  const handleAmenityToggle = (amenity: string) => {
-    setAmenities((prev) =>
-      prev.includes(amenity) ? prev.filter((a) => a !== amenity) : [...prev, amenity]
-    );
-  };
-
-  const handleDateSelect = (dates: Date[] | undefined) => {
-    if (!dates) return;
-    const uniqueDates = dates.filter(
-      (date) => !blockedDates.some((d) => d.toDateString() === date.toDateString())
-    );
-    setBlockedDates([...blockedDates, ...uniqueDates]);
   };
 
   const handleRemoveImage = (index: number) => {
@@ -126,11 +106,35 @@ export default function NewPropertyPage() {
     });
   };
 
+  // Host Image Handlers
+  const handleHostImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.[0]) {
+      const file = e.target.files[0];
+      setHostImage({ file, preview: URL.createObjectURL(file) });
+    }
+  };
+
   const handleRemoveHostImage = () => {
     if (hostImage?.preview) {
       URL.revokeObjectURL(hostImage.preview);
     }
     setHostImage(null);
+  };
+
+  // Amenities toggle handler
+  const handleAmenityToggle = (amenity: string) => {
+    setAmenities((prev) =>
+      prev.includes(amenity) ? prev.filter((a) => a !== amenity) : [...prev, amenity]
+    );
+  };
+
+  // Inventory (Blocked Dates) handler using react-calendar's onClickDay
+  const handleDayClick = (date: Date) => {
+    if (blockedDates.some((d) => d.toDateString() === date.toDateString())) {
+      setBlockedDates(blockedDates.filter((d) => d.toDateString() !== date.toDateString()));
+    } else {
+      setBlockedDates([...blockedDates, date]);
+    }
   };
 
   // Cloudinary upload function (memoized)
@@ -242,6 +246,7 @@ export default function NewPropertyPage() {
             lng: Number(longitude || 0),
           },
         },
+        inventory: blockedDates,
       };
 
       const res = await fetch("/api/properties", {
@@ -458,9 +463,7 @@ export default function NewPropertyPage() {
                         />
                         {uploadProgress[index] !== undefined && uploadProgress[index] < 100 && (
                           <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                            <div className="text-white font-medium">
-                              {Math.round(uploadProgress[index])}%
-                            </div>
+                            <div className="text-white font-medium">{Math.round(uploadProgress[index])}%</div>
                           </div>
                         )}
                         <button
@@ -606,7 +609,7 @@ export default function NewPropertyPage() {
                           <Checkbox
                             id="allowPets"
                             checked={allowPets}
-                            onCheckedChange={(checked:any) => setAllowPets(checked === true)}
+                            onCheckedChange={(checked: boolean) => setAllowPets(checked)}
                           />
                           <Label htmlFor="allowPets">Pets Allowed</Label>
                         </div>
@@ -614,7 +617,7 @@ export default function NewPropertyPage() {
                           <Checkbox
                             id="allowSmoking"
                             checked={allowSmoking}
-                            onCheckedChange={(checked:any) => setAllowSmoking(checked === true)}
+                            onCheckedChange={(checked: boolean) => setAllowSmoking(checked)}
                           />
                           <Label htmlFor="allowSmoking">Smoking Allowed</Label>
                         </div>
@@ -622,7 +625,7 @@ export default function NewPropertyPage() {
                           <Checkbox
                             id="allowParties"
                             checked={allowParties}
-                            onCheckedChange={(checked:any) => setAllowParties(checked === true)}
+                            onCheckedChange={(checked: boolean) => setAllowParties(checked)}
                           />
                           <Label htmlFor="allowParties">Parties Allowed</Label>
                         </div>
@@ -687,15 +690,22 @@ export default function NewPropertyPage() {
               <CardContent>
                 <div className="space-y-4 mb-6">
                   <p className="text-gray-500">
-                    Select dates when your property is not available for booking.
+                    Select dates when your property is not available (inventory management).
                   </p>
                   <div className="border rounded-md p-4">
                     <Calendar
-                      mode="multiple"
-                      selected={blockedDates}
-                      onSelect={handleDateSelect}
-                      className="rounded-md border"
-                      numberOfMonths={2}
+                      onClickDay={handleDayClick}
+                      tileClassName={({ date, view }: { date: Date; view: string }) => {
+                        if (
+                          view === "month" &&
+                          blockedDates.some(
+                            (d) => d.toDateString() === date.toDateString()
+                          )
+                        ) {
+                          return "bg-gray-300";
+                        }
+                      }}
+                      showDoubleView={true}
                     />
                   </div>
                   <div>

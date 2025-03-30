@@ -46,7 +46,6 @@ export async function PUT(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Merge updated data and save the property
     Object.assign(property, data);
     await property.save();
 

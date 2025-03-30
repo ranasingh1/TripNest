@@ -1,15 +1,29 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { PlusCircle, Search, Edit, Trash2, Eye, ChevronDown, Filter, Building } from "lucide-react"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import {
+  PlusCircle,
+  Search,
+  Edit,
+  Trash2,
+  Eye,
+  ChevronDown,
+  Filter,
+  Building,
+} from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Card } from "@/components/ui/card"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,63 +33,65 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function PropertiesPage() {
-  const [properties, setProperties] = useState<any[]>([])
-  const [searchQuery, setSearchQuery] = useState("")
-  const [loading, setLoading] = useState(true)
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [propertyToDelete, setPropertyToDelete] = useState<string | null>(null)
+  const [properties, setProperties] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [propertyToDelete, setPropertyToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        const token = localStorage.getItem("token")
+        const token = localStorage.getItem("token");
         const res = await fetch("/api/properties", {
           headers: { Authorization: `Bearer ${token}` },
-        })
-        if (!res.ok) throw new Error("Failed to fetch properties")
-        const data = await res.json()
-        setProperties(data)
+        });
+        if (!res.ok) throw new Error("Failed to fetch properties");
+        const data = await res.json();
+        setProperties(data);
       } catch (error) {
-        console.error("Error fetching properties:", error)
+        console.error("Error fetching properties:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    fetchProperties()
-  }, [])
+    };
+    fetchProperties();
+  }, []);
 
   const filteredProperties = properties.filter(
     (property) =>
       property.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       property.location.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  );
 
   const handleDeleteClick = (id: string) => {
-    setPropertyToDelete(id)
-    setDeleteDialogOpen(true)
-  }
+    setPropertyToDelete(id);
+    setDeleteDialogOpen(true);
+  };
 
   const confirmDelete = async () => {
     if (propertyToDelete) {
       try {
-        const token = localStorage.getItem("token")
+        const token = localStorage.getItem("token");
         const res = await fetch(`/api/properties/${propertyToDelete}`, {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
-        })
-        if (!res.ok) throw new Error("Failed to delete")
-        setProperties((prev) => prev.filter((p) => p._id !== propertyToDelete))
+        });
+        if (!res.ok) throw new Error("Failed to delete");
+        setProperties((prev) => prev.filter((p) => p._id !== propertyToDelete));
       } catch (err) {
-        console.error("Error deleting:", err)
+        console.error("Error deleting:", err);
       } finally {
-        setDeleteDialogOpen(false)
-        setPropertyToDelete(null)
+        setDeleteDialogOpen(false);
+        setPropertyToDelete(null);
       }
     }
-  }
+  };
+
   return (
     <div className="p-6 lg:p-8">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
@@ -137,17 +153,35 @@ export default function PropertiesPage() {
         </div>
       ) : filteredProperties.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProperties.map((property:any) => (
-            <Card key={property?._id} className="overflow-hidden hover:shadow-md transition-shadow">
+          {filteredProperties.map((property: any) => (
+            <Card
+              key={property?._id}
+              className="overflow-hidden hover:shadow-md transition-shadow"
+            >
               <div className="relative h-48">
-                <Image src={property.image || "/placeholder.svg"} alt={property.title} fill className="object-cover" />
+                <Image
+                  src={property?.images[0] || "/placeholder.svg"}
+                  alt={property.title}
+                  fill
+                  className="object-cover"
+                />
                 <div className="absolute top-2 right-2">
-                  <Badge className="bg-green-100 text-green-800 hover:bg-green-100">{property.status}</Badge>
+                  <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                    {property.status}
+                  </Badge>
                 </div>
               </div>
               <div className="p-4">
                 <h3 className="font-bold text-lg mb-1">{property.title}</h3>
                 <p className="text-gray-500 mb-2">{property.location}</p>
+                {property.inventory && property.inventory.length > 0 && (
+                  <p className="text-gray-500 mb-2 text-sm">
+                    Inventory:{" "}
+                    {property.inventory
+                      .map((d: string) => new Date(d).toLocaleDateString())
+                      .join(", ")}
+                  </p>
+                )}
                 <div className="flex justify-between items-center mb-4">
                   <span className="font-bold text-lg">${property.price}/night</span>
                   <span className="text-sm text-gray-500">{property.bookings} bookings</span>
@@ -188,7 +222,9 @@ export default function PropertiesPage() {
           </div>
           <h3 className="text-lg font-medium mb-2">No properties found</h3>
           <p className="text-gray-500 mb-6">
-            {searchQuery ? "No properties match your search criteria" : "You haven't added any properties yet"}
+            {searchQuery
+              ? "No properties match your search criteria"
+              : "You haven't added any properties yet"}
           </p>
           <Link href="/dashboard/properties/new">
             <Button className="bg-teal-600 hover:bg-teal-700">
@@ -217,6 +253,5 @@ export default function PropertiesPage() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  )
+  );
 }
-

@@ -65,7 +65,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
   const [longitude, setLongitude] = useState("");
 
   // Availability
-  const [blockedDates, setBlockedDates] = useState<Date[]>([]);
+  const [inventory, setinventory] = useState<Date[]>([]);
 
   // ----------------------------------------------------------------------------
   // Fetch property data on mount and populate state
@@ -88,7 +88,8 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
 
         // Amenities
         setAmenities(data.amenities || []);
-
+        console.log(data.Images, "Images");
+        
         // Images (assumed as an array of image URLs)
         if (data.images && Array.isArray(data.images)) {
           const formattedImages = data.images.map((url: string) => ({
@@ -135,8 +136,8 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
         }
 
         // Blocked Dates
-        if (data.blockedDates && Array.isArray(data.blockedDates)) {
-          setBlockedDates(data.blockedDates.map((date: string) => new Date(date)));
+        if (data.inventory && Array.isArray(data.inventory)) {
+          setinventory(data?.inventory.map((date: string) => new Date(date)));
         }
       } catch (err) {
         console.error(err);
@@ -239,7 +240,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
   // Toggle blocked date selection
   const handleDateSelect = (dates: Date[] | undefined) => {
     if (!dates) return;
-    setBlockedDates(dates);
+    setinventory(dates);
   };
 
   // ----------------------------------------------------------------------------
@@ -306,13 +307,14 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
             lng: Number(longitude || 0),
           },
         },
-        blockedDates,
+        inventory,
       };
 
       const res = await fetch(`/api/properties/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify(propertyData),
       });
@@ -814,32 +816,32 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
                   <div className="border rounded-md p-4">
                     <Calendar
                       mode="multiple"
-                      selected={blockedDates}
+                      selected={inventory}
                       onSelect={handleDateSelect}
                       className="rounded-md border"
                       numberOfMonths={2}
                     />
                   </div>
                   <div>
-                    <h3 className="font-medium mb-2">Blocked Dates: {blockedDates.length}</h3>
+                    <h3 className="font-medium mb-2">Blocked Dates: {inventory.length}</h3>
                     <div className="flex flex-wrap gap-2">
-                      {blockedDates.slice(0, 5).map((date, index) => (
+                      {inventory.slice(0, 5).map((date, index) => (
                         <div key={index} className="flex items-center bg-gray-100 rounded-full px-3 py-1 text-sm">
                           {date.toLocaleDateString()}
                           <button
                             type="button"
                             className="ml-2 text-gray-500 hover:text-gray-700"
                             onClick={() =>
-                              setBlockedDates(blockedDates.filter((_, i) => i !== index))
+                              setinventory(inventory.filter((_, i) => i !== index))
                             }
                           >
                             <X className="h-3 w-3" />
                           </button>
                         </div>
                       ))}
-                      {blockedDates.length > 5 && (
+                      {inventory.length > 5 && (
                         <div className="bg-gray-100 rounded-full px-3 py-1 text-sm">
-                          +{blockedDates.length - 5} more
+                          +{inventory.length - 5} more
                         </div>
                       )}
                     </div>

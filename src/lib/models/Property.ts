@@ -45,6 +45,7 @@ export interface IProperty extends Document {
   location_details: LocationDetails;
   owner: string;
   ownerEmail: string;
+  inventory: Date[];
 }
 
 const PropertySchema = new Schema<IProperty>(
@@ -87,6 +88,7 @@ const PropertySchema = new Schema<IProperty>(
     },
     owner: { type: String, required: true },
     ownerEmail: { type: String, required: true },
+    inventory: { type: [Date], default: [] },
   },
   { timestamps: true }
 );
