@@ -35,7 +35,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        // Retrieve token and store it in localStorage
         const token = await firebaseUser.getIdToken();
         localStorage.setItem("token", token);
 
@@ -56,7 +55,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string): Promise<CustomUser> => {
     const result = await signInWithEmailAndPassword(auth, email, password);
-    // Get the token and store it in localStorage
     const token = await result.user.getIdToken();
     localStorage.setItem("token", token);
 
@@ -72,7 +70,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, name: string): Promise<CustomUser> => {
     const result = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(result.user, { displayName: name });
-    // Get the token and store it in localStorage
     const token = await result.user.getIdToken();
     localStorage.setItem("token", token);
 
