@@ -28,6 +28,6 @@ export async function dbConnect() {
         cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => mongoose)
     }
     cached.conn = await cached.promise
-    console.log("Connected to MongoDB")
+    // console.log("Connected to MongoDB")
     return cached.conn
 }

@@ -88,7 +88,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
 
         // Amenities
         setAmenities(data.amenities || []);
-        console.log(data.Images, "Images");
+        // console.log(data.Images, "Images");
         
         // Images (assumed as an array of image URLs)
         if (data.images && Array.isArray(data.images)) {

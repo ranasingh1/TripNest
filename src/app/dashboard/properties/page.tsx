@@ -46,7 +46,6 @@ export default function PropertiesPage() {
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        const token = localStorage.getItem("token");
         const res = await fetch(`/api/properties?user=true`, {
           headers: { Authorization: `Bearer ${
             localStorage.getItem("token")
@@ -120,22 +119,7 @@ export default function PropertiesPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <div className="flex gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="flex items-center">
-                  <Filter className="mr-2 h-4 w-4" />
-                  Filter
-                  <ChevronDown className="ml-2 h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem>All Properties</DropdownMenuItem>
-                <DropdownMenuItem>Active</DropdownMenuItem>
-                <DropdownMenuItem>Inactive</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          
         </div>
       </Card>
 

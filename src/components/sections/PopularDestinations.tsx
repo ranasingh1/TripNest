@@ -13,7 +13,7 @@ export default function PopularDestinations() {
       try {
         const res = await fetch('/api/destinations');
         if (!res.ok) {
-          console.log(res);
+          // console.log(res);
           
           throw new Error("Failed to fetch popular destinations");
         }

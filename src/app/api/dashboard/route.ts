@@ -21,10 +21,17 @@ export async function GET(req: NextRequest) {
 
     await dbConnect();
 
-    const [properties, bookings] = await Promise.all([
-      Property.find({ ownerEmail: decoded.email, status: "Active" }),
-      Bookings.find({ email: decoded.email, status: { $in: ["confirmed", "pending"] } }),
-    ]);
+    const properties = await Property.find({ ownerEmail: decoded.email, status: "Active" });
+    const propertyIds = properties.map((p) => p._id);
+// console.log(propertyIds, "propertyIds");  
+
+    const bookings = await Bookings.find({
+      propertyId: { $in: propertyIds },
+      status: { $in: ["confirmed", "pending"] },
+    });
+
+    // console.log();
+    
 
     const totalRevenue = bookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0);
 

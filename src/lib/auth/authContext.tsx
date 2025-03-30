@@ -17,6 +17,7 @@ interface CustomUser {
   uid: string;
 }
 
+
 interface AuthContextType {
   user: CustomUser | null;
   loading: boolean;

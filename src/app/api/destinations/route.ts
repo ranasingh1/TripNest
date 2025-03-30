@@ -24,7 +24,7 @@ export async function GET() {
       image: dest.image || "/default-destination.jpg" 
     }));
 
-    console.log(destinations);
+    // console.log(destinations);
     return NextResponse.json(destinations);
   } catch (error: any) {
     return NextResponse.json(

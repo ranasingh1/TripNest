@@ -16,12 +16,12 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userProperties = await Property.find({ owner: user.uid }).sort({ createdAt: -1 });
+    const userProperties = await Property.find({ owner: user.uid  }).sort({ createdAt: -1 });
     return NextResponse.json(userProperties);
   }
 
   // Public fetch all
-  const properties = await Property.find().sort({ createdAt: -1 });
+  const properties = await Property.find({ status:'Active'}).sort({ createdAt: -1 });
   return NextResponse.json(properties);
 }
 
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
 
   const data = await req.json();
   await dbConnect();
-console.log(data.inventory, "data");
+// console.log(data.inventory, "data");
 
   const propertyData = {
     title: data.title,

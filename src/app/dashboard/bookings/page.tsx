@@ -57,7 +57,7 @@ export default function BookingsPage() {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const res = await fetch("/api/bookings",{
+        const res = await fetch("/api/bookings?user=true",{
           headers: {
             authorization: `Bearer ${localStorage.getItem("token")}`,
           },

@@ -50,7 +50,9 @@ export default function BookingDetailsPage() {
     const fetchBookingDetails = async () => {
       try {
         setLoading(true)
-        const res = await fetch(`/api/bookings/${bookingId}`)
+        const res = await fetch(`/api/bookings/${bookingId}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        })
         if (!res.ok) {
           throw new Error("Failed to fetch booking details")
         }
@@ -80,9 +82,11 @@ export default function BookingDetailsPage() {
   }, [bookingId])
 
   const formatDate = (date: string | Date) => {
-    return format(new Date(date), "MMM dd, yyyy")
+    const parsedDate = new Date(date)
+    if (isNaN(parsedDate.getTime())) return "Invalid date"
+    return format(parsedDate, "MMM dd, yyyy")
   }
-
+  
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -167,7 +171,7 @@ export default function BookingDetailsPage() {
           </Button>
           <div>
             <h1 className="text-2xl font-bold">Booking Details</h1>
-            <p className="text-gray-500">Booking #{booking._id.substring(0, 8)}</p>
+            <p className="text-gray-500">Booking #{booking?._id?.substring(0, 8)}</p>
           </div>
         </div>
 
@@ -184,7 +188,7 @@ export default function BookingDetailsPage() {
                 <CardTitle>Booking Summary</CardTitle>
                 {getStatusBadge(booking.status)}
               </div>
-              <CardDescription>Created on {formatDate(booking.createdAt)}</CardDescription>
+              <CardDescription>Created on {booking &&formatDate(booking?.createdAt)}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -194,7 +198,7 @@ export default function BookingDetailsPage() {
                   <div className="flex items-start gap-3">
                     <div className="h-16 w-16 rounded-md overflow-hidden flex-shrink-0">
                       <img
-                        src={booking.propertyImage || "/placeholder.svg"}
+                        src={booking?.propertyImage || "/placeholder.svg"}
                         alt={booking.propertyName}
                         className="h-full w-full object-cover"
                       />
@@ -288,28 +292,7 @@ export default function BookingDetailsPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Base rate</span>
-                  <span>{formatCurrency(booking.basePrice || 0)}</span>
-                </div>
-                {booking.cleaningFee > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Cleaning fee</span>
-                    <span>{formatCurrency(booking.cleaningFee || 0)}</span>
-                  </div>
-                )}
-                {booking.serviceFee > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Service fee</span>
-                    <span>{formatCurrency(booking.serviceFee || 0)}</span>
-                  </div>
-                )}
-                {booking.taxes > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Taxes</span>
-                    <span>{formatCurrency(booking.taxes || 0)}</span>
-                  </div>
-                )}
+              
                 <Separator />
                 <div className="flex justify-between font-medium">
                   <span>Total</span>
@@ -322,10 +305,10 @@ export default function BookingDetailsPage() {
                   </div>
                   <Badge
                     className={
-                      booking.paymentStatus === "paid" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
+                      booking.status === "confirmed" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
                     }
                   >
-                    {booking.paymentStatus === "paid" ? "Paid" : "Pending"}
+                    {booking.status === "confirmed" ? "Paid" : "Pending"}
                   </Badge>
                 </div>
               </div>

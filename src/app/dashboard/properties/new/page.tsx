@@ -137,7 +137,6 @@ export default function NewPropertyPage() {
     }
   };
 
-  // Cloudinary upload function (memoized)
   const uploadToCloudinary = useCallback(
     (file: File, index?: number): Promise<string> => {
       return new Promise<string>((resolve, reject) => {
@@ -247,6 +246,7 @@ export default function NewPropertyPage() {
           },
         },
         inventory: blockedDates,
+        
       };
 
       const res = await fetch("/api/properties", {

@@ -3,6 +3,7 @@ import Booking from '@/lib/models/Bookings';
 import Property from '@/lib/models/Property';
 import { dbConnect } from '@/lib/db';
 import nodemailer from 'nodemailer';
+import { verifyFirebaseToken } from '@/lib/auth/verifyFirebaseToken';
 
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
@@ -21,6 +22,22 @@ const transporter = nodemailer.createTransport({
 export async function GET(req: NextRequest) {
   try {
     await dbConnect();
+      const isUserQuery = req.nextUrl.searchParams.get("user") === "true";
+    
+      if (isUserQuery) {
+        const token = req.headers.get("authorization")?.split(" ")[1];
+        const user = token ? await verifyFirebaseToken(token) : null;
+    
+        if (!user) {
+          return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+        const userProperties = await Property.find({ ownerEmail: user.email }, "_id");
+        const propertyIds = userProperties.map((prop) => prop._id);
+
+        const bookings = await Booking.find({ propertyId: { $in: propertyIds } })
+        .populate("propertyId")
+        .sort({ createdAt: -1 });        return NextResponse.json(bookings);
+      }
     const bookings = await Booking.find().populate('propertyId').sort({ createdAt: -1 });
     return NextResponse.json(bookings);
   } catch (error) {
@@ -37,7 +54,6 @@ export async function POST(req: NextRequest) {
     const data = await req.json();
     await dbConnect();
 
-    // Validate required fields
     if (!data.propertyId || !data.name || !data.email || !data.checkIn || !data.checkOut || !data.totalPrice) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
@@ -53,13 +69,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid check-in or check-out dates' }, { status: 400 });
     }
 
-    // Generate booking date range
+    // booking date range
     const bookingDates: string[] = [];
     for (let d = new Date(checkIn); d < checkOut; d.setDate(d.getDate() + 1)) {
       bookingDates.push(d.toISOString().split('T')[0]);
     }
 
-    // Check for availability conflicts
+    // availability conflicts
     const blockedDates = property.inventory.map((d: Date) => new Date(d).toISOString().split('T')[0]);
     if (bookingDates.some(date => blockedDates.includes(date))) {
       return NextResponse.json({ error: 'Property is not available for the selected dates' }, { status: 400 });
@@ -81,12 +97,6 @@ export async function POST(req: NextRequest) {
 
     const newBooking = await Booking.create(bookingPayload);
 
-    // Update property inventory
-    property.inventory.push(...bookingDates.map(dateStr => new Date(dateStr)));
-    property.bookings = (property.bookings || 0) + 1;
-    if (property.bookings >= property.beds) {
-      property.status = 'Unavailable';
-    }
     await property.save();
 
     // Send confirmation email

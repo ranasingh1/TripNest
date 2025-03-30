@@ -20,37 +20,19 @@ const transporter = nodemailer.createTransport({
 
 export async function GET(req: NextRequest) {
   try {
-    const authHeader = req.headers.get("authorization");
-
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const token = authHeader.split(" ")[1];
-    const decoded = await verifyFirebaseToken(token);
-
-    if (!decoded || !decoded.email) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    }
-
     await dbConnect();
+    const id = req.nextUrl.pathname.split('/').pop();
+    if (!id) return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
 
-    // Find property IDs owned by the authenticated user
-    const properties = await Property.find({ ownerEmail: decoded.email }, "_id");
-    const propertyIds = properties.map(p => p._id);
+    const booking = await Booking.findById(id).populate('propertyId');
+    if (!booking) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-    // Fetch bookings for those properties
-    const bookings = await Booking.find({ propertyId: { $in: propertyIds } })
-      .populate('propertyId')
-      .sort({ createdAt: -1 });
-
-    return NextResponse.json(bookings);
+    return NextResponse.json(booking);
   } catch (error) {
-    console.error('Error fetching user-specific bookings:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('GET /api/bookings/[id] error:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
-
 
 export async function PUT(req: NextRequest) {
   try {
