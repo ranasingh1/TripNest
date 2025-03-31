@@ -1,8 +1,8 @@
-// app/api/popular-properties/route.ts
 import { dbConnect } from "@/lib/db";
 import Property from "@/lib/models/Property";
 import { NextResponse } from "next/server";
 
+// get popular properties
 export async function GET() {
   try {
     await dbConnect();

@@ -1,6 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 import PropertyCard from "@/components/property-card";
@@ -50,9 +53,15 @@ export default function FeaturedProperties() {
           )}
         </div>
 
-        {/* Properties Grid */}
+        {/* Properties Grid or Skeleton Loader */}
         {loading ? (
-          <div className="text-center">Loading...</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div key={index} className="rounded-lg overflow-hidden relative block h-64">
+                <Skeleton className="w-full h-full" />
+              </div>
+            ))}
+          </div>
         ) : error ? (
           <div className="text-center text-red-500">{error}</div>
         ) : visibleProperties.length > 0 ? (

@@ -3,6 +3,7 @@ import Property from '@/lib/models/Property';
 import { verifyFirebaseToken } from '@/lib/auth/verifyFirebaseToken';
 import { dbConnect } from '@/lib/db';
 
+//API route to get all properties or user properties
 export async function GET(req: NextRequest) {
   await dbConnect();
 
@@ -25,7 +26,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(properties);
 }
 
-
+//API route to create a new property
 export async function POST(req: NextRequest) {
   const token = req.headers.get('authorization')?.split(' ')[1];
   const user = token ? await verifyFirebaseToken(token) : null;

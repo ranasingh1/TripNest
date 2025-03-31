@@ -1,4 +1,3 @@
-import { log } from "console"
 import mongoose from "mongoose"
 
 const MONGODB_URI: string = process.env.MONGODB_URI || ""

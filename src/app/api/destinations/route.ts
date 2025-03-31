@@ -2,6 +2,7 @@ import { dbConnect } from "@/lib/db";
 import Property from "@/lib/models/Property";
 import { NextResponse } from "next/server";
 
+// get popular destinations
 export async function GET() {
   try {
     await dbConnect();

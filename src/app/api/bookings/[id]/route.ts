@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
 import Booking from '@/lib/models/Bookings';
 import Property from '@/lib/models/Property';
 import { verifyFirebaseToken } from '@/lib/auth/verifyFirebaseToken';
 import { dbConnect } from '@/lib/db';
+import nodemailer from 'nodemailer';
 
+// Email transporter
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
   port: Number(process.env.EMAIL_PORT),
@@ -13,10 +14,10 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-  tls: {
-    rejectUnauthorized: false,
-  },
+  tls: { rejectUnauthorized: false },
 });
+
+//API route to get a booking by ID
 
 export async function GET(req: NextRequest) {
   try {
@@ -34,6 +35,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
+//API route to update a booking by ID
 export async function PUT(req: NextRequest) {
   try {
     await dbConnect();
@@ -93,6 +95,8 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+
+//API route to delete a booking by ID
 
 export async function DELETE(req: NextRequest) {
   try {

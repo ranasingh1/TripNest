@@ -4,6 +4,7 @@ import Property from "@/lib/models/Property";
 import Bookings from "@/lib/models/Bookings";
 import { verifyFirebaseToken } from "@/lib/auth/verifyFirebaseToken";
 
+//get dashboard data for the authenticated user
 export async function GET(req: NextRequest) {
   try {
     const authHeader = req.headers.get("authorization");

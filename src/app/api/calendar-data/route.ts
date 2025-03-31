@@ -4,6 +4,7 @@ import Property from "@/lib/models/Property";
 import Booking from "@/lib/models/Bookings";
 import { verifyFirebaseToken } from "@/lib/auth/verifyFirebaseToken";
 
+//get all properties and bookings for the authenticated user for calendar data
 export async function GET(req: NextRequest) {
   try {
     const authHeader = req.headers.get("authorization");

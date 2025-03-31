@@ -10,3 +10,5 @@ export async function verifyFirebaseToken(token: string) {
     return null
   }
 }
+
+//TODO: build a middleware to verify the token and attach the user to the request object but this is not needed for now

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Property from '@/lib/models/Property';
 import { dbConnect } from '@/lib/db';
 
+//API route to search properties
 export async function GET(req: NextRequest) {
   await dbConnect();
   

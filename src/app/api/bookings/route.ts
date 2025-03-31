@@ -5,6 +5,7 @@ import { dbConnect } from '@/lib/db';
 import nodemailer from 'nodemailer';
 import { verifyFirebaseToken } from '@/lib/auth/verifyFirebaseToken';
 
+// Email transporter
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
   port: Number(process.env.EMAIL_PORT),
@@ -96,6 +97,9 @@ export async function POST(req: NextRequest) {
     };
 
     const newBooking = await Booking.create(bookingPayload);
+        // Update property inventory
+        property.inventory.push(...bookingDates.map(dateStr => new Date(dateStr)));
+        property.bookings = (property.bookings || 0) + 1;
 
     await property.save();
 

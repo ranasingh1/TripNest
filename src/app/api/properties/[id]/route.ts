@@ -8,6 +8,7 @@ async function getProperty(id: string) {
   return Property.findById(id);
 }
 
+//API route to get a property by ID
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -24,7 +25,7 @@ export async function GET(
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
-
+//API route to update a property by ID
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -55,6 +56,8 @@ export async function PUT(
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+
+//API route to delete a property 
 
 export async function DELETE(
   req: NextRequest,
